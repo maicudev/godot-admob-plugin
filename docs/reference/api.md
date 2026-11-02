@@ -38,6 +38,9 @@ void show_rewarded_interstitial()
 
 void request_user_consent()
 void reset_consent_state(will_request_user_consent = false)
+bool can_request_ads()
+int get_consent_status()
+int get_privacy_options_requirement_status()
 
 int get_banner_width()
 int get_banner_width_in_pixels()
@@ -49,6 +52,11 @@ bool get_is_rewarded_loaded()
 bool get_is_rewarded_interstitial_loaded()
 bool get_is_initialized()
 ```
+
+`get_consent_status()` returns `UNKNOWN = 0`, `NOT_REQUIRED = 1`,
+`REQUIRED = 2`, or `OBTAINED = 3`. The values returned by
+`get_privacy_options_requirement_status()` are `UNKNOWN = 0`,
+`NOT_REQUIRED = 1`, and `REQUIRED = 2`.
 
 ---
 

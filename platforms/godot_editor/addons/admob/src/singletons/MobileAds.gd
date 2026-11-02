@@ -97,6 +97,21 @@ func reset_consent_state(
 	if _plugin:
 		_plugin.reset_consent_state()
 
+func can_request_ads() -> bool:
+	if _plugin:
+		return _plugin.can_request_ads()
+	return false
+
+func get_consent_status() -> int:
+	if _plugin:
+		return _plugin.get_consent_status()
+	return 0
+
+func get_privacy_options_requirement_status() -> int:
+	if _plugin:
+		return _plugin.get_privacy_options_requirement_status()
+	return 0
+
 func get_banner_width() -> int:
 	if _plugin:
 		return _plugin.get_banner_width()

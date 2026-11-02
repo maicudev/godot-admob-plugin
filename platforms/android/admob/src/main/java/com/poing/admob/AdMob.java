@@ -122,6 +122,9 @@ public class AdMob extends org.godotengine.godot.plugin.GodotPlugin {
                 "show_rewarded_interstitial",
                 "request_user_consent",
                 "reset_consent_state",
+                "can_request_ads",
+                "get_consent_status",
+                "get_privacy_options_requirement_status",
                 "get_banner_width",
                 "get_banner_height",
                 "get_banner_width_in_pixels",
@@ -152,6 +155,53 @@ public class AdMob extends org.godotengine.godot.plugin.GodotPlugin {
     }
     public String get_initialization_description() { 
         return aInitializationDesc; 
+    }
+
+    /**
+     * Returns whether UMP allows an ad request at this moment.
+     *
+     * UMP returns false until consent information has been requested at least
+     * once, so a missing ConsentInformation instance is also treated as false.
+     */
+    public boolean can_request_ads() {
+        return aConsentInformation != null && aConsentInformation.canRequestAds();
+    }
+
+    /**
+     * Returns the UMP consent status using the values supported by Godot v1:
+     * UNKNOWN=0, NOT_REQUIRED=1, REQUIRED=2, OBTAINED=3.
+     */
+    public int get_consent_status() {
+        if (aConsentInformation == null) {
+            return ConsentInformation.ConsentStatus.UNKNOWN;
+        }
+        return aConsentInformation.getConsentStatus();
+    }
+
+    /**
+     * Returns the UMP privacy-options requirement status:
+     * UNKNOWN=0, NOT_REQUIRED=1, REQUIRED=2.
+     */
+    public int get_privacy_options_requirement_status() {
+        if (aConsentInformation == null) {
+            return 0;
+        }
+
+        ConsentInformation.PrivacyOptionsRequirementStatus status =
+                aConsentInformation.getPrivacyOptionsRequirementStatus();
+        if (status == null) {
+            return 0;
+        }
+
+        switch (status) {
+            case NOT_REQUIRED:
+                return 1;
+            case REQUIRED:
+                return 2;
+            case UNKNOWN:
+            default:
+                return 0;
+        }
     }
 
     @Override
