@@ -1,0 +1,10 @@
+[config]
+
+name="PoingGodotAdMobIronSource"
+binary_type="local"
+binary="poing-godot-admob-ironsource-release.aar"
+
+[dependencies]
+
+remote=["com.google.ads.mediation:ironsource:9.6.1.0"]
+custom_maven_repos=["https://android-sdk.is.com/"]

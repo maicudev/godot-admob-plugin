@@ -33,8 +33,64 @@ fi
 ROOT_DIR=$(pwd)
 EDITOR_DIR="$ROOT_DIR/platforms/godot_editor"
 
+# Android Gradle Plugin 8.1.4 requires JDK 17. Newer Android Studio builds
+# may set JAVA_HOME to a JDK that is newer than the Gradle wrapper supports
+# (for example, Java 25 reports class file major version 69).
+configure_android_java() {
+    java_major_version() {
+        "$1/bin/java" -version 2>&1 \
+            | sed -n 's/.*version "\([0-9][0-9]*\).*/\1/p' \
+            | head -n 1
+    }
+
+    local candidate
+    local major
+    local candidates=()
+
+    if [ -n "${JAVA_HOME:-}" ]; then
+        candidates+=("$JAVA_HOME")
+    fi
+
+    # Keep JAVA_HOME when it already points to the required toolchain.
+    for candidate in "${candidates[@]}"; do
+        if [ -x "$candidate/bin/java" ]; then
+            major=$(java_major_version "$candidate")
+            if [ "$major" = "17" ]; then
+                export PATH="$candidate/bin:$PATH"
+                echo "[INFO] Using Java $major from $candidate."
+                return 0
+            fi
+        fi
+    done
+
+    # Common Linux installation paths. The explicit JAVA_HOME above still
+    # takes precedence whenever it is a compatible JDK 17 installation.
+    candidates=(
+        "/usr/lib/jvm/java-17-openjdk"
+        "/usr/lib/jvm/java-17-openjdk-amd64"
+        "/usr/lib/jvm/jdk-17"
+    )
+
+    for candidate in "${candidates[@]}"; do
+        if [ -x "$candidate/bin/java" ]; then
+            major=$(java_major_version "$candidate")
+            if [ "$major" = "17" ]; then
+                export JAVA_HOME="$candidate"
+                export PATH="$candidate/bin:$PATH"
+                echo "[INFO] JAVA_HOME was incompatible; using Java $major from $candidate."
+                return 0
+            fi
+        fi
+    done
+
+    echo "[ERROR] Android build requires JDK 17 (current JAVA_HOME is incompatible)."
+    echo "[ERROR] Install JDK 17 or set JAVA_HOME to a JDK 17 installation."
+    return 1
+}
+
 build_android() {
     echo ">>> Preparing Android build for Godot $GODOT_VERSION..."
+    configure_android_java || exit 1
     cd "$ROOT_DIR/platforms/android" || exit 1
     chmod +x ./scripts/unix/download_godot.sh
     ./scripts/unix/download_godot.sh "$GODOT_VERSION" || exit 1
